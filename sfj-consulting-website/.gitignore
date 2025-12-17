@@ -1,0 +1,31 @@
+# SSL Certificates (never commit!)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (optional - uncomment if you don't want to track uploads)
+# uploads/
+# public/team/
+# public/doc/
+

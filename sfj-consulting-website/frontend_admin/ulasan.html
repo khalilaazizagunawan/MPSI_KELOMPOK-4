@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Ulasan - SFJ Admin</title>
+    <link rel="stylesheet" href="../css/styleAdmin.css">
+</head>
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="header-spacer"></div>
+        <ul class="sidebar-menu">
+            <li><a href="admin.html"><i class="icon-dashboard"></i> Dashboard</a></li>
+            <li><a href="kelola-tim.html"><i class="icon-team"></i> Kelola Tim</a></li>
+            <li><a href="dokumentasi.html"><i class="icon-docs"></i> Dokumentasi</a></li>
+            <li><a href="kelola-user.html"><i class="icon-users"></i> Kelola User</a></li>
+            <li><a href="ulasan.html" class="active"><i class="icon-review"></i> Ulasan</a></li>
+        </ul>
+        <button class="btn btn-logout" onclick="logout()"> Logout</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- HEADER FIXED -->
+        <header class="fixed-header">
+            <div class="header-left">
+                <img src="../public/logo/logo sfj.png" alt="SFJ Logo" class="header-logo">
+                <h1 id="pageTitle">Kelola Ulasan</h1>
+            </div>
+            <div class="header-right">
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="header-spacer"></div>
+
+        <section class="table-container">
+            <div class="table-header">
+                <section class="filter-section" style="margin-bottom: 24px;">
+                    <div class="status-filter-buttons">
+                        <button class="filter-btn active" data-status="all">Semua</button>
+                        <button class="filter-btn" data-status="published">Tampil</button>
+                        <button class="filter-btn" data-status="hidden">Disembunyikan</button>
+                    </div>
+                </section>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama User</th>
+                        <th>Ulasan</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="reviewsTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        // State global
+        let reviews = []; // Semua data dari server
+        let filteredReviews = []; // Data yang sedang ditampilkan setelah filter
+
+        // Load reviews saat halaman dibuka
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReviews();
+
+            // Setup filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Filter data
+                    const status = this.dataset.status;
+                    applyFilter(status);
+                });
+            });
+        });
+
+        // Fungsi utama load data dari API
+        async function loadReviews() {
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const tbody = document.getElementById('reviewsTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Memuat data...</td></tr>';
+
+            try {
+                const response = await fetch('/api/reviews?admin=true', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    reviews = data.data || [];
+                    filteredReviews = reviews; // Default: tampilkan semua
+                    renderReviewsTable();
+                } else {
+                    if (response.status === 401 || response.status === 403) {
+                        window.location.href = 'login.html';
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-600">Gagal memuat data</td></tr>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-600">Terjadi kesalahan jaringan</td></tr>';
+            }
+        }
+
+        // Fungsi filter client-side
+        function applyFilter(status) {
+            if (status === 'all') {
+                filteredReviews = reviews;
+            } else if (status === 'published') {
+                filteredReviews = reviews.filter(r => r.status === 'Tampil');
+            } else if (status === 'hidden') {
+                filteredReviews = reviews.filter(r => r.status === 'Disembunyikan');
+            }
+            renderReviewsTable();
+        }
+
+        // Render tabel
+        function renderReviewsTable() {
+            const tbody = document.getElementById('reviewsTableBody');
+
+            if (filteredReviews.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:60px; color:#9ca3af;">Tidak ada ulasan ditemukan</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredReviews.map((review, index) => {
+                const date = new Date(review.created_at);
+                const formattedDate = date.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                const authorName = review.is_anonymous 
+                    ? 'Anonim' 
+                    : `${review.first_name || ''}${review.last_name ? ' ' + review.last_name : ''}`.trim() || 'Anonim';
+
+                const isPublished = review.status === 'Tampil';
+                const statusClass = isPublished ? 'status-active' : 'status-non-active';
+                const toggleText = isPublished ? 'Sembunyikan' : 'Tampilkan';
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${escapeHtml(authorName)}</td>
+                        <td style="max-width: 300px; word-wrap: break-word;">${escapeHtml(review.comment)}</td>
+                        <td>${formattedDate}</td>
+                        <td><span class="${statusClass}">${review.status}</span></td>
+                        <td style="white-space: nowrap;">
+                            <button class="btn-action edit" onclick="toggleReview(${review.id})" style="margin-right:8px;">
+                                ${toggleText}
+                            </button>
+                            <button class="btn-action delete" onclick="deleteReview(${review.id})">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Escape HTML untuk keamanan
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Toggle status Tampil / Disembunyikan
+        async function toggleReview(id) {
+            if (!confirm('Ubah status ulasan ini?')) return;
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/reviews/${id}/toggle`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Status ulasan berhasil diubah!');
+                    loadReviews(); // Reload untuk update data terbaru
+                } else {
+                    alert(data.message || 'Gagal mengubah status');
+                }
+            } catch (error) {
+                console.error('Error toggling review:', error);
+                alert('Terjadi kesalahan saat mengubah status');
+            }
+        }
+
+        // Hapus ulasan
+        async function deleteReview(id) {
+            if (!confirm('Hapus ulasan ini secara permanen?')) return;
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/reviews/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Ulasan berhasil dihapus!');
+                    loadReviews(); // Reload data
+                } else {
+                    alert(data.message || 'Gagal menghapus ulasan');
+                }
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                alert('Terjadi kesalahan saat menghapus');
+            }
+        }
+    </script>
+</body>
+</html>

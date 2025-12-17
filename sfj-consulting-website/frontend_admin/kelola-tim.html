@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Tim - SFJ Admin</title>
+    <link rel="stylesheet" href="../css/styleAdmin.css">
+    <style>
+        .team-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .team-photo:hover {
+            transform: scale(1.1);
+            border-color: #1a5f7a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .team-photo.clickable {
+            cursor: pointer;
+        }
+        #photoModal img {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        
+                
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .btn-secondary {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="header-spacer"></div>
+        <ul class="sidebar-menu">
+            <li><a href="admin.html"><i class="icon-dashboard"></i> Dashboard</a></li>
+            <li><a href="kelola-tim.html" class="active"><i class="icon-team"></i> Kelola Tim</a></li>
+            <li><a href="dokumentasi.html"><i class="icon-docs"></i> Dokumentasi</a></li>
+            <li><a href="kelola-user.html"><i class="icon-users"></i> Kelola User</a></li>
+            <li><a href="ulasan.html"><i class="icon-review"></i> Ulasan</a></li>
+        </ul>
+        <button class="btn btn-logout" onclick="logout()"> Logout</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- HEADER FIXED -->
+        <header class="fixed-header">
+            <div class="header-left">
+                <img src="../public/logo/logo sfj.png" alt="SFJ Logo" class="header-logo">
+                <h1 id="pageTitle">Kelola Tim</h1>
+            </div>
+            <div class="header-right">
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="header-spacer"></div>
+
+        <section class="table-container">
+            <div class="table-header">
+                <button class="btn-search" onclick="openModal()">+ Tambah Anggota</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Foto</th>
+                        <th>Nama</th>
+                        <th>Posisi</th>
+                        <th>Deskripsi</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="teamTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modal Tambah/Edit Tim -->
+    <div class="modal modal-form" id="teamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Anggota Tim</h3>
+            </div>
+
+            <form id="teamForm" enctype="multipart/form-data">
+                <input type="hidden" id="teamId">
+
+                <div class="form-group">
+                    <label>Foto *</label>
+                    <input type="file" id="photo" accept="image/*" style="margin-bottom: 10px;" required>
+                    <img id="photoPreview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; display: none; border-radius: 8px; margin-top: 10px; object-fit: cover;">
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Lengkap *</label>
+                    <input type="text" id="nama" placeholder="Hanya huruf dan spasi" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Posisi *</label>
+                    <input type="text" id="posisi" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Deskripsi *</label>
+                    <input type="text" id="deskripsi" placeholder="Deskripsi singkat..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Quote *</label>
+                    <textarea id="quote" rows="3" placeholder="Quote atau motto..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select id="status" required>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-search" id="submitBtn">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div class="modal modal-photo" id="photoModal" style="background: rgba(0,0,0,0.9);">
+        <div class="modal-content" style="max-width: 90%; max-height: 90%; background: transparent; box-shadow: none;">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <button onclick="closePhotoModal()" style="background: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">✕</button>
+            </div>
+            <img id="photoModalImg" src="" alt="Photo" style="max-width: 100%; max-height: 80vh; border-radius: 8px; object-fit: contain;">
+            <h3 id="photoModalTitle" style="color: white; text-align: center; margin-top: 15px;"></h3>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        // State
+        let teamMembers = [];
+        let editingId = null;
+
+        // Load team on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamMembers();
+        });
+
+        // Load team members from API
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team');
+                const data = await response.json();
+                
+                if (data.success) {
+                    teamMembers = data.data;
+                    renderTeamTable();
+                }
+            } catch (error) {
+                console.error('Error loading team:', error);
+                document.getElementById('teamTableBody').innerHTML =
+                    '<tr><td colspan="7" class="text-center">Gagal memuat data</td></tr>';
+            }
+        }
+
+        // Render team table
+        function renderTeamTable() {
+            const tbody = document.getElementById('teamTableBody');
+            
+            if (teamMembers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Belum ada anggota tim</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = teamMembers.map((member, index) => {
+                const statusClass = member.status === 'Aktif' ? 'status-active' : 'status-inactive';
+                const photoUrl = member.avatar || '';
+                const hasPhoto = photoUrl && photoUrl.trim() !== '';
+                const displayPhotoUrl = hasPhoto ? photoUrl : 'https://via.placeholder.com/80?text=No+Photo';
+                
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>
+                            ${member.avatar ? 
+                                `<img src="${member.avatar}" alt="${escapeHtml(member.name)}" class="team-photo clickable" onclick="showPhotoModal('${member.avatar}', '${escapeHtml(member.name)}')">` 
+                                : '<span>No photo</span>'
+                            }
+                        </td>
+                        
+                        <td><strong>${escapeHtml(member.name)}</strong></td>
+                        <td>${escapeHtml(member.position)}</td>
+                        <td>${escapeHtml(member.description || '-')}</td>
+                        <td><span class="${statusClass}">${member.status}</span></td>
+                        <td>
+                            <button class="btn-action edit" onclick="editMember(${member.id})">Edit</button>
+                            <button class="btn-action delete" onclick="deleteMember(${member.id})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Photo preview
+        const photoInput = document.getElementById('photo');
+        if (photoInput) {
+            photoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                const preview = document.getElementById('photoPreview');
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        // Validasi nama hanya huruf dan spasi (real-time)
+        const namaInput = document.getElementById('nama');
+        if (namaInput) {
+            namaInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                // Hanya izinkan huruf, spasi, dan karakter khusus Indonesia
+                const cleaned = value.replace(/[^a-zA-Z\s\u00C0-\u017F]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+            });
+            
+            namaInput.addEventListener('blur', function(e) {
+                const value = e.target.value.trim();
+                if (value && !/^[a-zA-Z\s\u00C0-\u017F]+$/.test(value)) {
+                    e.target.setCustomValidity('Nama hanya boleh berisi huruf dan spasi');
+                    e.target.style.borderColor = '#dc2626';
+                } else {
+                    e.target.setCustomValidity('');
+                    e.target.style.borderColor = '';
+                }
+            });
+        }
+
+        // Open modal
+        function openModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Tambah Anggota Tim';
+            document.getElementById('teamForm').reset();
+            document.getElementById('teamId').value = '';
+            document.getElementById('photo').value = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            // Photo is required for new member
+            document.getElementById('photo').setAttribute('required', 'required');
+            document.getElementById('teamModal').style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('teamModal').style.display = 'none';
+            document.getElementById('teamForm').reset();
+            document.getElementById('photoPreview').style.display = 'none';
+            editingId = null;
+        }
+
+        // Edit member
+        function editMember(id) {
+            const member = teamMembers.find(m => m.id === id);
+            if (!member) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Anggota Tim';
+            document.getElementById('photo').value = '';
+            document.getElementById('teamId').value = id;
+            document.getElementById('nama').value = member.name;
+            document.getElementById('posisi').value = member.position;
+            document.getElementById('deskripsi').value = member.description || '';
+            document.getElementById('quote').value = member.quote || '';
+            document.getElementById('status').value = member.status;
+            
+            // Show existing photo if available
+            const preview = document.getElementById('photoPreview');
+            const photoInput = document.getElementById('photo');
+            if (member.avatar) {
+                preview.src = member.avatar;
+                preview.style.display = 'block';
+                // Remove required if already has photo
+                photoInput.removeAttribute('required');
+            } else {
+                preview.style.display = 'none';
+                // Keep required if no existing photo
+                photoInput.setAttribute('required', 'required');
+            }
+            
+            document.getElementById('teamModal').style.display = 'flex';
+        }
+
+        // Delete member
+        async function deleteMember(id) {
+            if (!confirm('Hapus anggota tim ini?')) return;
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/team/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Anggota tim berhasil dihapus!');
+                    loadTeamMembers();
+                } else {
+                    alert(data.message || 'Gagal menghapus anggota tim');
+                }
+            } catch (error) {
+                console.error('Error deleting member:', error);
+                alert('Gagal menghapus anggota tim');
+            }
+        }
+
+        // Form submit
+        const teamForm = document.getElementById('teamForm');
+        if (teamForm) teamForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get all values
+            const namaValue = document.getElementById('nama').value.trim();
+            const posisiValue = document.getElementById('posisi').value.trim();
+            const deskripsiValue = document.getElementById('deskripsi').value.trim();
+            const quoteValue = document.getElementById('quote').value.trim();
+            const photoInput = document.getElementById('photo');
+            const existingMember = editingId ? teamMembers.find(m => m.id === editingId) : null;
+            const hasExistingPhoto = existingMember && existingMember.avatar;
+
+            // Validasi foto untuk anggota baru
+            if (!editingId && (!photoInput.files || !photoInput.files[0])) {
+                alert('Foto wajib diupload!');
+                return;
+            }
+
+            // Validasi nama
+            if (!namaValue) {
+                alert('Nama Lengkap wajib diisi!');
+                document.getElementById('nama').focus();
+                return;
+            }
+            if (!/^[a-zA-Z\s\u00C0-\u017F]+$/.test(namaValue)) {
+                alert('Nama hanya boleh berisi huruf dan spasi');
+                document.getElementById('nama').focus();
+                return;
+            }
+
+            // Validasi posisi
+            if (!posisiValue) {
+                alert('Posisi wajib diisi!');
+                document.getElementById('posisi').focus();
+                return;
+            }
+
+            // Validasi deskripsi
+            if (!deskripsiValue) {
+                alert('Deskripsi wajib diisi!');
+                document.getElementById('deskripsi').focus();
+                return;
+            }
+
+            // Validasi quote
+            if (!quoteValue) {
+                alert('Quote wajib diisi!');
+                document.getElementById('quote').focus();
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+
+            // Use FormData for file upload
+            const formData = new FormData();
+            formData.append('name', namaValue);
+            formData.append('position', document.getElementById('posisi').value.trim());
+            formData.append('description', document.getElementById('deskripsi').value.trim());
+            formData.append('quote', document.getElementById('quote').value.trim());
+            formData.append('status', document.getElementById('status').value);
+            
+            // photoInput already declared above
+            if (photoInput.files && photoInput.files[0]) {
+                formData.append('photo', photoInput.files[0]);
+            }
+
+            try {
+                const url = editingId ? `/api/team/${editingId}` : '/api/team';
+                const method = editingId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(editingId ? 'Anggota tim berhasil diperbarui!' : 'Anggota tim berhasil ditambahkan!');
+                    closeModal();
+                    loadTeamMembers();
+                } else {
+                    alert(data.message || 'Gagal menyimpan data');
+                }
+            } catch (error) {
+                console.error('Error saving member:', error);
+                alert('Gagal menyimpan data');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Simpan';
+            }
+        });
+
+        // Close modal when clicking outside
+        const teamModal = document.getElementById('teamModal');
+        if (teamModal) {
+            teamModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Show photo modal
+        function showPhotoModal(photoUrl, name) {
+            const modal = document.getElementById('photoModal');
+            const img = document.getElementById('photoModalImg');
+            const title = document.getElementById('photoModalTitle');
+            
+            if (modal && img && title) {
+                img.src = photoUrl;
+                title.textContent = name;
+                modal.style.display = 'flex';
+            }
+        }
+
+        // Close photo modal
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close photo modal when clicking outside
+        const photoModalEl = document.getElementById('photoModal');
+        if (photoModalEl) {
+            photoModalEl.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePhotoModal();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

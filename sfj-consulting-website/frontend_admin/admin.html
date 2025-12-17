@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SFJ Consulting</title>
+    <link rel="stylesheet" href="../css/styleAdmin.css">
+</head>
+<body class="dashboard-body activity-collapsed no-right-gap">
+    
+    <!-- Sidebar Navbar -->
+    <nav class="sidebar">
+        <div class="header-spacer"></div>
+        <ul class="sidebar-menu">
+            <li><a href="admin.html" class="active"><i class="icon-dashboard"></i> Dashboard</a></li>
+            <li><a href="kelola-tim.html"><i class="icon-team"></i> Kelola Tim</a></li>
+            <li><a href="dokumentasi.html"><i class="icon-docs"></i> Dokumentasi</a></li>
+            <li><a href="kelola-user.html"><i class="icon-users"></i> Kelola User</a></li>
+            <li><a href="ulasan.html"><i class="icon-review"></i> Ulasan</a></li>
+        </ul>
+        <button class="btn btn-logout" onclick="logout()"> Logout</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- HEADER FIXED – Muncul di semua halaman admin -->
+        <header class="fixed-header">
+            <div class="header-left">
+                <img src="../public/logo/logo sfj.png" alt="SFJ Logo" class="header-logo">
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+
+            <div class="header-right">
+            </div>
+        </header>
+
+        <!-- Spacer supaya konten tidak tertutup header -->
+        <div class="header-spacer"></div>
+        
+
+        <!-- Dashboard Title -->
+        <section class="dashboard-section">
+            <h2>Jadwal Konsultasi</h2>
+            <p>Daftar booking konsultasi yang masuk</p>
+        </section>
+
+        <!-- Stats Cards (Mirip gambar 1) -->
+        <section class="stats-grid">
+            <div class="stat-card total">
+                <h2>0</h2>
+                <p>Total Booking</p>
+            </div>
+            <div class="stat-card waiting">
+                <h2>0</h2>
+                <p>Menunggu</p>
+            </div>
+            <div class="stat-card confirmed">
+                <h2>0</h2>
+                <p>Terkonfirmasi</p>
+            </div>
+            <div class="stat-card done">
+                <h2>0</h2>
+                <p>Selesai</p>
+            </div>
+        </section>
+
+        <!-- Search & Filter Tabs (Mirip gambar 1) -->
+        <section class="filter-section">
+            <input type="text" class="search-input" placeholder="Cari berdasarkan email...">
+            <button class="btn btn-search">Cari</button>
+        </section>
+        <section class="status-tabs">
+            <button class="tab-btn active" data-status="all">Semua <span>0</span></button>
+            <button class="tab-btn" data-status="waiting">Menunggu <span>0</span></button>
+            <button class="tab-btn" data-status="confirmed">Terkonfirmasi <span>0</span></button>
+            <button class="tab-btn" data-status="done">Selesai <span>0</span></button>
+        </section>
+
+        <!-- Daftar Booking with Cards (Grid seperti gambar 2) -->
+        <section class="booking-list">
+            <h3>Daftar Booking</h3>
+
+            <!-- Wrapper untuk scroll horizontal -->
+            <div class="booking-cards-grid" id="bookingCards">
+                    <!-- Card akan di-generate oleh JS -->
+                </div>
+            </div>
+
+            <!-- Pesan kalau kosong -->
+            <p class="no-booking">Belum ada permintaan konsultasi yang masuk.</p>
+        </section>
+    </main>
+
+    <!-- Modal Detail Booking -->
+    <div id="bookingDetailModal" class="modal">
+        <div class="modal-content modal-form">
+            <span class="modal-close">&times;</span>
+            <div class="modal-header" style="text-align: center; margin-bottom: 24px;">
+                <h3 style="background: linear-gradient(135deg, var(--primary), var(--primary-800)); -webkit-background-clip: text;-webkit-text-fill-color: transparent; margin: 0; font-size: 28px;"">Detail Pengajuan</h3>
+            </div>
+            <div id="bookingDetailContent">
+                <!-- Data akan diisi oleh JavaScript -->
+                <p style="text-align:center; color:#6b7280;">Memuat detail...</p>
+            </div>
+            <div class="modal-actions" style="margin-top: 32px;">
+                <button class="btn-secondary modal-close-btn">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

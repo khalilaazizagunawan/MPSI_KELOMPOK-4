@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi - SFJ Admin</title>
+    <link rel="stylesheet" href="../css/styleAdmin.css">
+    <style>
+        /* Perbaikan Modal */
+        .modal-content {
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            margin-bottom: 20px; /* Jarak antara title dan form */
+            flex-shrink: 0;
+        }
+
+        .modal-content form {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 8px;
+        }
+
+        /* Textarea Fixed */
+        .form-group textarea {
+            resize: vertical;
+            max-height: 150px;
+            min-height: 80px;
+            overflow-y: auto;
+            font-family: var(--font-family-base);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Make all form inputs same width */
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Foto Column Styling */
+        .doc-photo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .doc-photo-placeholder {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            font-size: 24px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="header-spacer"></div>
+        <ul class="sidebar-menu">
+            <li><a href="admin.html"><i class="icon-dashboard"></i> Dashboard</a></li>
+            <li><a href="kelola-tim.html"><i class="icon-team"></i> Kelola Tim</a></li>
+            <li><a href="dokumentasi.html" class="active"><i class="icon-docs"></i> Dokumentasi</a></li>
+            <li><a href="kelola-user.html"><i class="icon-users"></i> Kelola User</a></li>
+            <li><a href="ulasan.html"><i class="icon-review"></i> Ulasan</a></li>
+        </ul>
+        <button class="btn btn-logout" onclick="logout()"> Logout</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- HEADER FIXED -->
+        <header class="fixed-header">
+            <div class="header-left">
+                <img src="../public/logo/logo sfj.png" alt="SFJ Logo" class="header-logo">
+                <h1 id="pageTitle">Dokumentasi</h1>
+            </div>
+            <div class="header-right">
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="header-spacer"></div>
+
+        <!-- Documents Tab -->
+        <section class="table-container" id="documentsTab">
+            <div class="table-header">
+                <button class="btn-search" onclick="openModal()">+ Tambah Dokumentasi</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Foto</th>
+                        <th>Judul Dokumen</th>
+                        <th>Kategori</th>
+                        <th>Deskripsi</th>
+                        <th>Tanggal Upload</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="documentsTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modal Tambah/Edit Dokumentasi -->
+    <div class="modal" id="docModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h3 id="docModalTitle">Tambah Dokumentasi</h3>
+            </div>
+
+            <form id="docForm" enctype="multipart/form-data">
+                <input type="hidden" id="docId">
+
+                <div class="form-group">
+                    <label>Judul Dokumen *</label>
+                    <input type="text" id="judulDokumen" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Kategori *</label>
+                    <select id="kategoriDokumen" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Tata Kelola & Manajemen SPBE">Tata Kelola & Manajemen SPBE</option>
+                        <option value="Layanan SPBE">Layanan SPBE</option>
+                        <option value="Audit TIK">Audit TIK</option>
+                        <option value="Workshop & Pelatihan">Workshop & Pelatihan</option>
+                        <option value="Panduan">Panduan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Deskripsi *</label>
+                    <textarea id="deskripsiDokumen" rows="3" placeholder="Deskripsi dokumen..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Gambar *</label>
+                    <div class="file-input-wrapper">
+                        <div class="file-input-label" id="fileLabel">
+                            <span>🖼️ Klik atau drag gambar ke sini</span>
+                        </div>
+                        <input type="file" id="fileDokumen" accept="image/*" required>
+                    </div>
+                    <div class="file-info" id="fileInfo">
+                        <span class="filename" id="fileName"></span>
+                        <span class="filesize" id="fileSize"></span>
+                    </div>
+                    <img id="imagePreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 8px;">
+                    <div id="existingFile" style="margin-top: 10px; display: none;">
+                        <small>Gambar saat ini: <a href="#" id="existingFileLink" class="download-link" target="_blank"></a></small>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-search" id="submitBtn">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        // State
+        let documents = [];
+        let editingId = null;
+
+        // Category mapping for display
+        const categoryLabels = {
+            'Tata Kelola & Manajemen SPBE': 'Tata Kelola',
+            'Layanan SPBE': 'Layanan SPBE',
+            'Audit TIK': 'Audit TIK',
+            'Workshop & Pelatihan': 'Workshop',
+            'Panduan': 'Panduan',
+            'Lainnya': 'Lainnya'
+        };
+
+        // File input handling
+        const fileInput = document.getElementById('fileDokumen');
+        const fileLabel = document.getElementById('fileLabel');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                
+                // Validate if it's an image
+                if (!file.type.startsWith('image/')) {
+                    alert('Hanya file gambar yang diperbolehkan!');
+                    this.value = '';
+                    resetFileInput();
+                    return;
+                }
+                
+                fileLabel.classList.add('has-file');
+                fileLabel.innerHTML = '<span>✅ Gambar dipilih</span>';
+                fileName.textContent = file.name;
+                fileSize.textContent = ' (' + formatFileSize(file.size) + ')';
+                fileInfo.classList.add('show');
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                resetFileInput();
+            }
+        });
+
+        function resetFileInput() {
+            fileLabel.classList.remove('has-file');
+            fileLabel.innerHTML = '<span>🖼️ Klik atau drag gambar ke sini</span>';
+            fileInfo.classList.remove('show');
+            fileName.textContent = '';
+            fileSize.textContent = '';
+            const preview = document.getElementById('imagePreview');
+            if (preview) {
+                preview.style.display = 'none';
+                preview.src = '';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Load documents on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDocuments();
+        });
+
+        // Load documents from API
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents');
+                const data = await response.json();
+                
+                if (data.success) {
+                    documents = data.data;
+                    renderDocuments();
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                document.getElementById('documentsTableBody').innerHTML = 
+                    '<tr><td colspan="7" class="text-center">Gagal memuat data</td></tr>';
+            }
+        }
+
+        // Render documents table
+        function renderDocuments() {
+            const tbody = document.getElementById('documentsTableBody');
+            
+            if (documents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Belum ada dokumen</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = documents.map((doc, index) => {
+                const date = new Date(doc.created_at);
+                const formattedDate = date.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                // Display image or placeholder
+                const imageHtml = doc.filepath 
+                    ? `<img src="${doc.filepath}" alt="${escapeHtml(doc.title)}" class="doc-photo" 
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="doc-photo-placeholder" style="display:none;">🖼️</div>`
+                    : `<div class="doc-photo-placeholder">🖼️</div>`;
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${imageHtml}</td>
+                        <td>${escapeHtml(doc.title)}</td>
+                        <td>${escapeHtml(categoryLabels[doc.category] || doc.category)}</td>
+                        <td>${escapeHtml(doc.description || '-')}</td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <button class="btn-action edit" onclick="editDocument(${doc.id})">Edit</button>
+                            <button class="btn-action delete" onclick="deleteDocument(${doc.id})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Open modal for add/edit
+        function openModal() {
+            editingId = null;
+            document.getElementById('docModalTitle').textContent = 'Tambah Dokumentasi';
+            document.getElementById('docForm').reset();
+            document.getElementById('docId').value = '';
+            document.getElementById('existingFile').style.display = 'none';
+            // Set required for new document
+            document.getElementById('fileDokumen').setAttribute('required', 'required');
+            resetFileInput();
+            document.getElementById('docModal').style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('docModal').style.display = 'none';
+            document.getElementById('docForm').reset();
+            resetFileInput();
+            editingId = null;
+        }
+
+        // Edit document
+        function editDocument(id) {
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            editingId = id;
+            document.getElementById('docModalTitle').textContent = 'Edit Dokumentasi';
+            document.getElementById('docId').value = id;
+            document.getElementById('judulDokumen').value = doc.title;
+            document.getElementById('kategoriDokumen').value = doc.category;
+            document.getElementById('deskripsiDokumen').value = doc.description || '';
+            
+            // Show existing image
+            if (doc.filepath) {
+                document.getElementById('existingFile').style.display = 'block';
+                document.getElementById('existingFileLink').textContent = 'Lihat gambar';
+                document.getElementById('existingFileLink').href = doc.filepath;
+                
+                const preview = document.getElementById('imagePreview');
+                preview.src = doc.filepath;
+                preview.style.display = 'block';
+                
+                // Remove required if already has image
+                document.getElementById('fileDokumen').removeAttribute('required');
+            } else {
+                document.getElementById('existingFile').style.display = 'none';
+                // Keep required if no existing image
+                document.getElementById('fileDokumen').setAttribute('required', 'required');
+            }
+            
+            resetFileInput();
+            document.getElementById('docModal').style.display = 'flex';
+        }
+
+        // Delete document
+        async function deleteDocument(id) {
+            if (!confirm('Hapus dokumen ini?')) return;
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/documents/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Dokumen berhasil dihapus!');
+                    loadDocuments();
+                } else {
+                    alert(data.message || 'Gagal menghapus dokumen');
+                }
+            } catch (error) {
+                console.error('Error deleting document:', error);
+                alert('Gagal menghapus dokumen');
+            }
+        }
+
+        // Form submit handler with file upload
+        document.getElementById('docForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const token = localStorage.getItem('sfj_token');
+            if (!token) {
+                alert('Silakan login terlebih dahulu');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Validate image upload for new document
+            const fileInput = document.getElementById('fileDokumen');
+            const existingDoc = editingId ? documents.find(d => d.id === editingId) : null;
+            const hasExistingImage = existingDoc && existingDoc.filepath;
+            
+            if (!editingId && (!fileInput.files || !fileInput.files[0])) {
+                alert('Gambar wajib diupload!');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+
+            // Use FormData for file upload
+            const formData = new FormData();
+            formData.append('title', document.getElementById('judulDokumen').value.trim());
+            formData.append('category', document.getElementById('kategoriDokumen').value);
+            formData.append('description', document.getElementById('deskripsiDokumen').value.trim());
+            
+            // fileInput already declared above
+            if (fileInput.files && fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            try {
+                const url = editingId ? `/api/documents/${editingId}` : '/api/documents';
+                const method = editingId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(editingId ? 'Dokumen berhasil diperbarui!' : 'Dokumen berhasil ditambahkan!');
+                    closeModal();
+                    loadDocuments();
+                } else {
+                    alert(data.message || 'Gagal menyimpan dokumen');
+                }
+            } catch (error) {
+                console.error('Error saving document:', error);
+                alert('Gagal menyimpan dokumen');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Simpan';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('docModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
