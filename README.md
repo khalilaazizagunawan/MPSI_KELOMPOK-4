@@ -153,15 +153,3 @@ npm run dev
 
 ---
 
-## 📜 License
-
-This project is developed for **educational and project purposes**.
-All rights reserved © SFJ Consulting.
-
-
-
-* 🔹 Menyesuaikan README ini **sesuai framework yang kamu pakai**
-* 🔹 Membuat versi **lebih singkat (1 halaman)**
-* 🔹 Menambahkan **badge GitHub (build, license, tech stack)**
-
-Tinggal bilang 👍
